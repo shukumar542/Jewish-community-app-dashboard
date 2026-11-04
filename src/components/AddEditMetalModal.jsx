@@ -121,7 +121,7 @@ const AddEditMetalModal = ({ open, onClose, editingMetal }) => {
           <Button
             htmlType="submit"
             loading={isSaving}
-            className="h-10.5! rounded-xl! bg-[#652D8B]! hover:bg-[#5b21b6]! text-white! border-none! font-medium!"
+            className="h-10.5! rounded-xl! bg-[#F7B115]! hover:bg-[#5b21b6]! text-white! border-none! font-medium!"
           >
             {!isSaving && (
               <div className="flex items-center gap-2">

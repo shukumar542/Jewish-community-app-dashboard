@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import TextEditor from "../../components/TextEditor";
 import { LegalSkeleton } from "../../components/shimmer/LegalSkeleton";
 import {
-  useGetContentQuery,
-  useSaveContentMutation,
+  useGetPrivacyQuery,
+  useUpdatePrivacyPolicyMutation,
 } from "../../redux/api/profileApi";
 
 const CONTENT_TYPE = "privacy_policy";
@@ -15,8 +15,8 @@ export default function PrivacyPolicyManagement() {
   const [initialized, setInitialized] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { data, isLoading, refetch } = useGetContentQuery(CONTENT_TYPE);
-  const [saveContent, { isLoading: isSaving }] = useSaveContentMutation();
+  const { data, isLoading, refetch } = useGetPrivacyQuery(CONTENT_TYPE);
+  const [saveContent, { isLoading: isSaving }] = useUpdatePrivacyPolicyMutation();
 
   const serverContent = data?.data?.content ?? "";
   if (!initialized && serverContent) {
@@ -75,7 +75,7 @@ export default function PrivacyPolicyManagement() {
           className={`w-full mt-6 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-[0.99] ${
             isSaving
               ? "bg-purple-300 text-white cursor-not-allowed"
-              : "bg-[#652D8B] text-white hover:bg-[#7b3aa8]"
+              : "bg-[#F7B115] text-white"
           }`}
         >
           {isSaving ? "Saving..." : "Save Privacy Policy"}

@@ -15,13 +15,10 @@ import EditProfile from "./pages/Settings/EditProfile";
 import PrivacySettings from "./pages/Settings/PrivacySettings";
 import TermsAndConditions from "./pages/Settings/TermsAndConditions";
 import UserManagement from "./pages/UserManagement";
-import MetalPrice from "./pages/Metal/MetalPrice";
-import EmployeeManagement from "./pages/Employee/EmployeeManagement";
 import RequestOrder from "./pages/Order/RequestOrder";
 import Order from "./pages/Order/Order";
-import Messages from "./pages/Messages";
-import ReviewQuotePage from "./pages/Common/ReviewQuotePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EventManagement from "./pages/EventManagement";
 function App() {
   return (
     <Router>
@@ -38,11 +35,9 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
               <Layout>
                 <DashboardPage />
               </Layout>
-            </ProtectedRoute>
           }
         />
 
@@ -58,7 +53,7 @@ function App() {
           path="/add-metal-price"
           element={
             <Layout>
-              <MetalPrice />
+              <EventManagement />
             </Layout>
           }
         />
@@ -71,14 +66,7 @@ function App() {
             </Layout>
           }
         />
-        <Route
-          path="/employee-management"
-          element={
-            <Layout>
-              <EmployeeManagement />
-            </Layout>
-          }
-        />
+      
         <Route
           path="/order"
           element={
@@ -87,22 +75,8 @@ function App() {
             </Layout>
           }
         />
-        <Route
-          path="/messages"
-          element={
-            <Layout>
-              <Messages />
-            </Layout>
-          }
-        />
-        <Route
-          path="/order-details/:id"
-          element={
-            <Layout>
-              <ReviewQuotePage />
-            </Layout>
-          }
-        />
+       
+      
 
         <Route
           path="/aboutUs"

@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Text from "../../components/Text";
 import Inputbox from "../../components/InputBox";
-import Button from "../../components/Button";
 import { useLoginMutation } from "../../redux/api/authApi";
 import { toast } from "react-toastify";
 
 const LoginPage = () => {
-  const [login, { isLoading }] = useLoginMutation(); // 👈 get isLoading
+  const [login, { isLoading }] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -17,20 +16,31 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       toast.error("Please fill in all fields");
       return;
     }
 
     try {
-      const res = await login({ email, password }).unwrap();
-      if (res?.data?.accessToken) {
-        localStorage.setItem("token", res.data.accessToken);
-        toast.success(res.message || "Login Successful");
-        navigate("/dashboard");
+      const res = await login({ email: email.trim(), password }).unwrap();
+
+      const token = res?.data?.accessToken;
+      console.log(res?.data?.accessToken)
+
+      if (token) {
+        const storage = remember ? localStorage : sessionStorage;
+        storage.setItem("token", token);
+
+        const user = res?.user || res?.data?.user;
+        if (user) storage.setItem("user", JSON.stringify(user));
       }
-    } catch (error) {
-      toast.error(error?.data?.message || "Something went wrong!");
+
+      toast.success(res?.message || "Login successful");
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error(
+        err?.data?.message || err?.error || "Login failed. Please try again."
+      );
     }
   };
 
@@ -94,16 +104,9 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#652D8B] text-white rounded-2xl font-bold transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#F7B115] text-white rounded-2xl font-bold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign In"
-              )}
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </div>
         </form>

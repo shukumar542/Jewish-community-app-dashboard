@@ -3,66 +3,90 @@ import { baseApi } from "./baseApi";
 export const profileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query({
-      query: () => ({ url: "/auth/me", method: "GET" }),
+      query: () => ({ url: "/admin/profile", method: "GET" }), providesTags : ["Profile"],
     }),
     updateProfile: builder.mutation({
-      query: ({ name, address, phoneNumber, profileImage }) => {
+      query: ({ name, profileImage }) => {
         const formData = new FormData();
-        formData.append("name", name);
-        formData.append("address", address);
-        formData.append("phoneNumber", phoneNumber);
-        if (profileImage) {
-          formData.append("profileImage", profileImage);
-        }
+        if (name) formData.append("fullName", name);
+        if (profileImage) formData.append("picture", profileImage);
+
         return {
-          url: "/auth/update-profile",
+          url: "/admin/profile",
           method: "PATCH",
-          body: formData,
+          body: formData, 
         };
       },
+      invalidatesTags: ["Profile"],
     }),
     changePassword: builder.mutation({
       query: (body) => ({
-        url: "/auth/changed-password",
-        method: "POST",
+        url: "/user/change-password",
+        method: "PATCH",
         body,
       }),
     }),
     getAllUsers: builder.query({
-      query: ({ page = 1, limit = 10, searchTerm = "", status = "" } = {}) => {
-        const params = new URLSearchParams();
-        params.append("page", page);
-        params.append("limit", limit);
-        if (searchTerm) params.append("searchTerm", searchTerm);
-        if (status) params.append("status", status);
-        return { url: `/users/all?${params.toString()}`, method: "GET" };
+      query: ({ status, page, limit, search }) => {
+        const params = { status, page, limit };
+        if (search) params.search = search;
+        return {
+          url: "/admin/users",
+          method: "GET",
+          params,
+        };
       },
-      providesTags: ["Users"],
+      providesTags: ["Users"]
     }),
     updateUserStatus: builder.mutation({
       query: ({ id, status }) => ({
-        url: `/auth/update-status/${id}`,
+        url: `/admin/users/${id}/status`,
         method: "PATCH",
         body: { status },
       }),
       invalidatesTags: ["Users"],
     }),
     // {{baseUrl}}/content
-    getContent: builder.query({
-      query: (type) => `/content/${type}`, // ← was `/content?type=${type}`
-      providesTags: (result, error, type) => [{ type: "Content", id: type }],
+    getAboutUs: builder.query({
+      query: () => `/website-content/about-us`,
+      providesTags: ["aboutUs"],
     }),
 
-    // ── POST (create OR update) ───────────────────────────
-    saveContent: builder.mutation({
+    updateAboutUs: builder.mutation({
       query: (body) => ({
-        url: "/content",
-        method: "POST",
-        body, // { type, content }
+        url: "/website-content/about-us",
+        method: "PATCH",
+        body,
       }),
-      invalidatesTags: (result, error, { type }) => [
-        { type: "Content", id: type },
-      ],
+      invalidatesTags :["aboutUs"]
+    }),
+    // Privacy policy
+    getPrivacy: builder.query({
+      query: () => `/website-content/privacy-policy`,
+      providesTags: ["privacy"],
+    }),
+
+    updatePrivacyPolicy: builder.mutation({
+      query: (body) => ({
+        url: "/website-content/privacy-policy",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags :["privacy"]
+    }),
+    // Terms conditions
+    getTerms: builder.query({
+      query: () => `/website-content/terms-and-conditions`,
+      providesTags: ["terms"],
+    }),
+
+    updateTerms: builder.mutation({
+      query: (body) => ({
+        url: "/website-content/terms-and-conditions",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags :["terms"]
     }),
   }),
 });
@@ -73,6 +97,10 @@ export const {
   useChangePasswordMutation,
   useGetAllUsersQuery,
   useUpdateUserStatusMutation,
-  useGetContentQuery,
-  useSaveContentMutation,
+  useUpdateAboutUsMutation,
+  useGetAboutUsQuery,
+  useGetPrivacyQuery,
+  useGetTermsQuery,
+  useUpdatePrivacyPolicyMutation,
+  useUpdateTermsMutation
 } = profileApi;

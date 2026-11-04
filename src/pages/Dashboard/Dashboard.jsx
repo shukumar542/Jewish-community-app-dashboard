@@ -20,21 +20,29 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import RecentUsersTable from "../../components/RecentUserTable/RecentUserTable";
-import BannerUploader from "../../components/Banneruploader";
 import { useGetDashboardAnalyticsQuery } from "../../redux/api/dashboardApi";
+import { useGetAllUsersQuery } from "../../redux/api/profileApi";
 
 const DashboardPage = () => {
   const currentYear = new Date().getFullYear();
+  const [search, setSearch] = useState("");
+
   const { data } = useGetDashboardAnalyticsQuery({
     purchaseGrowthYear: currentYear,
     customerGrowthYear: currentYear,
   });
 
+
   const dashboardData = data?.data;
 
-  console.log(dashboardData);
+  const { data: userss, isLoading, isError, error } = useGetAllUsersQuery({
+    status: "active", 
+    page: 1,
+    limit: 10,
+  });
 
-  // --- API INTEGRATION ENDS HERE ---
+  
+
 
   return (
     <div className="min-h-screen p-8 font-sans text-slate-800 ">
@@ -50,31 +58,7 @@ const DashboardPage = () => {
         </div>
       </header>
 
-      {/* Top Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <>
-          <StatCard
-            title="Total Users"
-            value={dashboardData?.summary?.totalUsers || 0}
-            icon={Users}
-          />
-          <StatCard
-            title="Total Customers"
-            value={dashboardData?.summary?.customer || 0}
-            icon={UserCheck}
-          />
-          <StatCard
-            title="Total Employees"
-            value={dashboardData?.summary?.staff || 0}
-            icon={User}
-          />
-          <StatCard
-            title="Total Metals"
-            value={dashboardData?.summary?.totalMetals || 0}
-            icon={TrendingUp}
-          />
-        </>
-      </div>
+
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -85,7 +69,7 @@ const DashboardPage = () => {
           chartType="area"
         />
         <IndependentChartCard
-          title="Monthly Purchase Overview"
+          title="Event Overview"
           type="blog"
           dataKey="blogGrowth"
           chartType="bar"
@@ -94,7 +78,7 @@ const DashboardPage = () => {
 
       {/* Recent Users Table */}
       <div>
-        <BannerUploader />
+        <RecentUsersTable users={userss?.data?.users} isLoading={false} />
       </div>
     </div>
   );
@@ -184,7 +168,7 @@ const IndependentChartCard = ({ title, type, chartType }) => {
                 </option>
               ))}
             </select>
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#652D8B] group-hover/select:text-[#652D8B] transition-colors">
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#F7B115] group-hover/select:text-[#F7B115] transition-colors">
               <ChevronDown size={14} strokeWidth={3} />
             </div>
           </div>
@@ -213,13 +197,13 @@ const IndependentChartCard = ({ title, type, chartType }) => {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#652D8B" }}
+                tick={{ fontSize: 12, fill: "#F7B115" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#652D8B" }}
+                tick={{ fontSize: 12, fill: "#F7B115" }}
               />
               <Tooltip
                 contentStyle={{
@@ -231,9 +215,9 @@ const IndependentChartCard = ({ title, type, chartType }) => {
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#652D8B"
+                stroke="#F7B115"
                 strokeWidth={3}
-                fill={`#652D8B`}
+                fill={`#F7B115`}
               />
             </AreaChart>
           ) : (
@@ -247,13 +231,13 @@ const IndependentChartCard = ({ title, type, chartType }) => {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#652D8B" }}
+                tick={{ fontSize: 12, fill: "#F7B115" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#652D8B" }}
+                tick={{ fontSize: 12, fill: "#F7B115" }}
               />
               <Tooltip
                 cursor={{ fill: "#f8fafc" }}
@@ -265,7 +249,7 @@ const IndependentChartCard = ({ title, type, chartType }) => {
               />
               <Bar
                 dataKey="count"
-                fill="#652D8B"
+                fill="#F7B115"
                 radius={[4, 4, 0, 0]}
                 barSize={12}
               />
@@ -278,25 +262,7 @@ const IndependentChartCard = ({ title, type, chartType }) => {
   );
 };
 
-const StatCard = ({ title, value, icon }) => {
-  const Icon = icon;
 
-  return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex gap-5 items-start transition-all hover:shadow-md hover:-translate-y-1 group">
-      <div className="p-3 bg-[#F0EAF3] rounded-xl border border-slate-100 group-hover:text-white transition-all duration-300">
-        <Icon size={22} className="text-[#652D8B]" />
-      </div>
-      <div>
-        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1 leading-tight">
-          {title}
-        </p>
-        <h3 className="text-3xl font-black text-slate-800 tracking-tight">
-          {value}
-        </h3>
-      </div>
-    </div>
-  );
-};
 
 const SkeletonStatCard = () => (
   <div className="bg-white p-6 rounded-2xl border border-slate-200 animate-pulse">

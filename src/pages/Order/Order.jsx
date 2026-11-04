@@ -153,7 +153,7 @@ function EmptyState({ message = "No orders found" }) {
   return (
     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-12 flex flex-col items-center justify-center text-center">
       <div className="w-14 h-14 rounded-full bg-[#F3EDF9] flex items-center justify-center mb-4">
-        <CalendarDays size={24} className="text-[#652D8B]" />
+        <CalendarDays size={24} className="text-[#F7B115]" />
       </div>
       <p className="text-[#111827] font-medium mb-1">{message}</p>
       <p className="text-sm text-[#6B7280]">
@@ -300,7 +300,7 @@ export default function Order() {
               onClick={() => handleTabChange(value)}
               className={`h-9 px-4 rounded-xl text-sm font-medium transition-all ${
                 activeTab === value
-                  ? "bg-[#652D8B] text-white"
+                  ? "bg-[#F7B115] text-white"
                   : "bg-[#F3F4F6] text-[#111827]"
               }`}
             >
@@ -331,7 +331,7 @@ export default function Order() {
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 flex-wrap mb-5">
-                      <span className="bg-[#F3EDF9] text-[#652D8B] text-xs font-semibold px-3 py-1 rounded-md font-mono tracking-wide">
+                      <span className="bg-[#F3EDF9] text-[#F7B115] text-xs font-semibold px-3 py-1 rounded-md font-mono tracking-wide">
                         {order.orderNumber}
                       </span>
                       <span
@@ -410,7 +410,7 @@ export default function Order() {
 
                   <div className="text-right shrink-0">
                     <p className="text-xs text-[#9CA3AF]">Sub Total</p>
-                    <h2 className="text-[34px] font-bold text-[#652D8B] mt-1 leading-none">
+                    <h2 className="text-[34px] font-bold text-[#F7B115] mt-1 leading-none">
                       ${Number(order.subTotal).toLocaleString()}
                     </h2>
                     <p className="text-xs text-[#9CA3AF] mt-2">

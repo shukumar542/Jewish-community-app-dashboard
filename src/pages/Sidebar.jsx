@@ -21,7 +21,7 @@ const SidebarItem = ({ to, icon, label }) => {
         className={({ isActive }) =>
           `w-full px-4 py-3 rounded-2xl flex items-center group transition-all duration-200 ${
             isActive
-              ? "bg-[#652D8B] text-white"
+              ? "bg-[#F7B115] text-white"
               : "text-[#0F0B18] hover:bg-neutral-800 hover:text-white"
           }`
         }
@@ -42,31 +42,7 @@ const SidebarItem = ({ to, icon, label }) => {
 };
 
 const Sidebar = ({ sidebarVisible }) => {
-  // const SidebarItem = ({ to, icon: Icon, label }) => (
-  //   <li>
-  //     <NavLink
-  //       to={to}
-  //       className={({ isActive }) =>
-  //         `w-full px-4 py-3 rounded-2xl flex items-center group transition-all duration-200 ${
-  //           isActive
-  //             ? "bg-[#652D8B] text-white"
-  //             : "text-[#0F0B18] hover:bg-neutral-800 hover:text-white"  // ✅ hover:text-white added
-  //         }`
-  //       }
-  //     >
-  //       {({ isActive }) => (
-  //         <>
-  //           <Icon
-  //             className={`mr-3 size-5 ${
-  //               isActive ? "text-white" : "group-hover:text-white"
-  //             }`}
-  //           />
-  //           {sidebarVisible && <span className="font-medium">{label}</span>}
-  //         </>
-  //       )}
-  //     </NavLink>
-  //   </li>
-  // );
+ 
 
   return (
     <div
@@ -77,7 +53,7 @@ const Sidebar = ({ sidebarVisible }) => {
       <div className="flex items-center justify-between mb-8 w-full relative">
         {sidebarVisible && (
           <div className="w-full flex justify-center">
-            <img src={logo} alt="Logo" className="h-14 w-auto" />
+            {/* <img src={logo} alt="Logo" className="h-14 w-auto" /> */}
           </div>
         )}
       </div>
@@ -97,20 +73,10 @@ const Sidebar = ({ sidebarVisible }) => {
           <SidebarItem
             to="/add-metal-price"
             icon={MonitorCloud}
-            label="Add Metal Price"
+            label="Events"
           />
-          <SidebarItem
-            to="/requested-orders"
-            icon={FiShoppingBag}
-            label="Requestes"
-          />
-          <SidebarItem
-            to="/employee-management"
-            icon={LiaUserFriendsSolid}
-            label="Employee "
-          />
-          <SidebarItem to="/order" icon={BookCheck} label="Orders" />
-          <SidebarItem to="/messages" icon={MessageSquare} label="Messages" />
+       
+         
 
           <li className="relative group/parent">
             <button className="w-full px-4 py-3 rounded-2xl flex items-center group transition-all text-[#0F0B18] hover:bg-neutral-800 hover:text-white">

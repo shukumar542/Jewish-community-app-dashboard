@@ -60,7 +60,7 @@ function EmptyState({ search, activeTab }) {
   return (
     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center">
       <div className="w-14 h-14 bg-[#F3EDF9] rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <FileText size={24} className="text-[#652D8B]" />
+        <FileText size={24} className="text-[#F7B115]" />
       </div>
       <h3 className="text-[#111827] font-semibold text-base mb-1">
         No requests found
@@ -163,7 +163,7 @@ export default function RequestOrder() {
 
   const getActionStyle = (order) => {
     if (order.status === "pending") {
-      return "bg-[#652D8B] text-white";
+      return "bg-[#F7B115] text-white";
     }
 
     if (
@@ -227,7 +227,7 @@ export default function RequestOrder() {
               }}
               className={`h-10 px-5 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${
                 activeTab === tab.id
-                  ? "bg-[#652D8B] text-white"
+                  ? "bg-[#F7B115] text-white"
                   : "bg-[#F9FAFB] text-[#111827]"
               }`}
             >
@@ -291,7 +291,7 @@ export default function RequestOrder() {
                   <p className="text-xs text-[#9CA3AF] mt-1">
                     {formatDate(order.createdAt)}
                   </p>
-                  <h3 className="text-[28px] font-bold text-[#652D8B] mt-2">
+                  <h3 className="text-[28px] font-bold text-[#F7B115] mt-2">
                     {formatAmount(order)}
                   </h3>
                 </div>
@@ -321,7 +321,7 @@ export default function RequestOrder() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="h-9 px-4 rounded-xl text-sm font-medium bg-white border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:border-[#652D8B] transition-colors"
+            className="h-9 px-4 rounded-xl text-sm font-medium bg-white border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:border-[#F7B115] transition-colors"
           >
             Previous
           </button>
@@ -349,8 +349,8 @@ export default function RequestOrder() {
                   onClick={() => setPage(p)}
                   className={`h-9 w-9 rounded-xl text-sm font-medium transition-colors ${
                     page === p
-                      ? "bg-[#652D8B] text-white"
-                      : "bg-white border border-[#E5E7EB] text-[#374151] hover:border-[#652D8B]"
+                      ? "bg-[#F7B115] text-white"
+                      : "bg-white border border-[#E5E7EB] text-[#374151] hover:border-[#F7B115]"
                   }`}
                 >
                   {p}
@@ -361,7 +361,7 @@ export default function RequestOrder() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="h-9 px-4 rounded-xl text-sm font-medium bg-white border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:border-[#652D8B] transition-colors"
+            className="h-9 px-4 rounded-xl text-sm font-medium bg-white border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:border-[#F7B115] transition-colors"
           >
             Next
           </button>

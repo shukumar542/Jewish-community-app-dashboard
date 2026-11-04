@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Camera, Eye, EyeOff, User, Mail, Phone, MapPin } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Camera, Eye, EyeOff, User } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,54 +14,67 @@ import {
 export default function ProfileManagement() {
   const [activeTab, setActiveTab] = useState("edit-profile");
 
-  const { data, isLoading, isError, error } = useGetProfileQuery();
-  const profile = data?.data;
-
+  const { data, isLoading, isError } = useGetProfileQuery();
   const [updateProfile, { isLoading: isUpdatingProfile }] =
     useUpdateProfileMutation();
-
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [avatar, setAvatar] = useState("");
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [initialized, setInitialized] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
   const [changePassword, { isLoading: isChangingPassword }] =
     useChangePasswordMutation();
+
+  // Works whether the API returns { data: {...} } or the profile directly
+  const profile = data?.data ?? data;
+
+  const [name, setName] = useState("");
+  const [initialized, setInitialized] = useState(false);
+
+  const [avatar, setAvatar] = useState(""); // local blob preview
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [loadedSrc, setLoadedSrc] = useState(""); // last src that finished loading
+  const [picVersion, setPicVersion] = useState(Date.now()); // cache buster
 
   const [passwords, setPasswords] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Fill the name once when profile data arrives
+  useEffect(() => {
+    if (profile && !initialized) {
+      setName(profile.fullName || "");
+      setInitialized(true);
+    }
+  }, [profile, initialized]);
+
+  // Free the blob URL when it is replaced or on unmount
+  useEffect(() => {
+    return () => {
+      if (avatar) URL.revokeObjectURL(avatar);
+    };
+  }, [avatar]);
+
+  const serverPicture = profile?.picture
+    ? `${profile.picture}${profile.picture.includes("?") ? "&" : "?"}v=${picVersion}`
+    : "";
+  const imageSrc = avatar || serverPicture;
+  const imageLoaded = loadedSrc === imageSrc;
 
   const handleAvatarSelect = (file) => {
+    if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
       return toast.error("File is too large. Max 2MB allowed.");
     }
-    setIsUploadingImage(true);
-    setImageLoaded(false);
-    setTimeout(() => {
-      setAvatar(URL.createObjectURL(file));
-      setAvatarFile(file);
-      setIsUploadingImage(false);
-    }, 500);
+    setAvatar(URL.createObjectURL(file));
+    setAvatarFile(file);
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await updateProfile({
-        name,
-        address,
-        phoneNumber,
-        profileImage: avatarFile, // null if not changed
-      }).unwrap();
+      await updateProfile({ name, profileImage: avatarFile }).unwrap();
       toast.success("Profile updated successfully!");
       setAvatarFile(null);
+      setAvatar("");
+      setPicVersion(Date.now()); // force the browser to reload the new picture
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update profile.");
     }
@@ -76,6 +89,7 @@ export default function ProfileManagement() {
       await changePassword({
         oldPassword: passwords.oldPassword,
         newPassword: passwords.newPassword,
+        confirmNewPassword: passwords.newPassword
       }).unwrap();
       toast.success("Password changed successfully!");
       setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
@@ -84,11 +98,7 @@ export default function ProfileManagement() {
     }
   };
 
-  console.log("isError:", isError);
-  console.log("error:", error);
-  console.log("token:", localStorage.getItem("token"));
-
-  // Guards
+  // Guards (after all hooks)
   if (isLoading) return <ProfileSkeleton />;
   if (isError)
     return (
@@ -96,61 +106,59 @@ export default function ProfileManagement() {
         Failed to load profile. Please try again.
       </div>
     );
-  if (!data?.data)
+  if (!profile)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
         No profile data found.
       </div>
     );
 
-  // Safe init after guards
-  if (!initialized) {
-    setName(profile.name || "");
-    setAddress(profile.address || "");
-    setPhoneNumber(profile.phoneNumber || "");
-    setAvatar(profile.profileImage || "");
-    setInitialized(true);
-  }
-
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6 md:pt-20 font-sans text-slate-800">
       <ToastContainer theme="colored" />
 
       {/* Profile Header */}
-      <div className="w-full max-w-200 bg-[#652D8B] rounded-[2.5rem] p-8 mb-10 relative flex flex-col items-center shadow-xl">
+      <div className="w-full max-w-200 bg-[#F7B115] rounded-[2.5rem] p-8 mb-10 relative flex flex-col items-center shadow-xl">
         <div className="relative">
           <div
-            className={`w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-slate-200 ${isUploadingImage ? "opacity-50" : ""}`}
+            className={`w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-slate-200 relative ${
+              isUpdatingProfile ? "opacity-50" : ""
+            }`}
           >
-            {/* Spinner shown until image loads */}
-            {!imageLoaded && (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[#652D8B] border-t-transparent rounded-full animate-spin" />
+            {imageSrc ? (
+              <>
+                {!imageLoaded && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-[#F7B115] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                <img
+                  key={imageSrc}
+                  src={imageSrc}
+                  alt="Profile"
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
+                  }`}
+                  onLoad={() => setLoadedSrc(imageSrc)}
+                  onError={() => setLoadedSrc(imageSrc)}
+                />
+              </>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <User size={40} />
               </div>
             )}
-            <img
-              src={avatar}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0 absolute"}`}
-              alt="Profile"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(true)} // stop spinner even if image fails
-            />
           </div>
+
           <FileUploader onFileSelect={handleAvatarSelect} accept="image/*">
             <div className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-md cursor-pointer">
-              {isUploadingImage ? (
-                <div className="w-4 h-4 border-2 border-[#652D8B] border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Camera size={16} />
-              )}
+              <Camera size={16} />
             </div>
           </FileUploader>
         </div>
+
         <div className="text-center mt-4">
           <h2 className="text-2xl font-bold text-white">{name}</h2>
-          <p className="text-gray-400 text-sm uppercase tracking-wider">
-            {profile.role}
-          </p>
         </div>
       </div>
 
@@ -162,7 +170,7 @@ export default function ProfileManagement() {
             onClick={() => setActiveTab(tab)}
             className={`pb-2 font-bold capitalize ${
               activeTab === tab
-                ? "text-[#652D8B] border-b-2 border-[#652D8B]"
+                ? "text-[#F7B115] border-b-2 border-[#F7B115]"
                 : "text-gray-400"
             }`}
           >
@@ -181,28 +189,11 @@ export default function ProfileManagement() {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <FormInput
-              label="Email Address"
-              icon={<Mail size={18} />}
-              value={profile.email || ""}
-              readOnly
-            />
-            <FormInput
-              label="Phone Number"
-              icon={<Phone size={18} />}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <FormInput
-              label="Address"
-              icon={<MapPin size={18} />}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+
             <button
               type="submit"
               disabled={isUpdatingProfile}
-              className="w-full py-4 bg-[#652D8B] text-white rounded-2xl font-bold"
+              className="w-full py-4 bg-[#F7B115] text-white rounded-2xl font-bold disabled:opacity-60"
             >
               {isUpdatingProfile ? "Updating..." : "Update Profile"}
             </button>
@@ -233,7 +224,7 @@ export default function ProfileManagement() {
             <button
               type="submit"
               disabled={isChangingPassword}
-              className="w-full py-4 bg-[#652D8B] text-white rounded-2xl font-bold"
+              className="w-full py-4 bg-[#F7B115] text-white rounded-2xl font-bold disabled:opacity-60"
             >
               {isChangingPassword ? "Saving..." : "Save & Change"}
             </button>
@@ -253,7 +244,9 @@ function FormInput({ label, value, onChange, icon, readOnly }) {
           value={value}
           onChange={onChange}
           readOnly={readOnly}
-          className={`w-full p-4 pl-12 rounded-xl border ${readOnly ? "bg-gray-100" : "bg-white"}`}
+          className={`w-full p-4 pl-12 rounded-xl border ${
+            readOnly ? "bg-gray-100" : "bg-white"
+          }`}
         />
         <div className="absolute left-4 inset-y-0 flex items-center text-gray-400">
           {icon}

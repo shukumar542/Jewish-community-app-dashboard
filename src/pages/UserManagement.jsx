@@ -1,34 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Pagination } from "../components/Pagination";
 import RecentUsersTable from "../components/RecentUserTable/RecentUserTable";
 import { useGetAllUsersQuery } from "../redux/api/profileApi";
 
+const STATUS_FILTERS = [
+  { label: "All Users", value: "all" },
+  { label: "Active", value: "active" },
+  { label: "Suspended", value: "suspended" },
+];
+
 export default function UserManagement() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeStatus, setActiveStatus] = useState("");
+  const [activeStatus, setActiveStatus] = useState("all");
 
-  const { data, isLoading } = useGetAllUsersQuery({
-    page: currentPage,
-    limit: 10,
-    searchTerm,
-    status: activeStatus,
-  });
-
-  const users = data?.data || [];
-  const totalPages = data?.meta?.totalPages || 1;
-
-  const handleSearch = (e) => {
-    const val = e.target.value;
-    setInputValue(val);
-    clearTimeout(window._searchTimer);
-    window._searchTimer = setTimeout(() => {
-      setSearchTerm(val);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(inputValue.trim());
       setCurrentPage(1);
     }, 500);
-  };
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+
+  const { data, isLoading } = useGetAllUsersQuery({
+    status: activeStatus,
+    page: currentPage,
+    limit: 10,
+    ...(search && { search }),
+  });
+
+  
+  const users = data?.data?.users || [];
+  const totalPages = data?.meta?.pagination?.totalPages || 1;
 
   const handleStatusFilter = (status) => {
     setActiveStatus(status);
@@ -60,22 +66,18 @@ export default function UserManagement() {
             type="text"
             placeholder="Search by user..."
             value={inputValue}
-            onChange={handleSearch}
+            onChange={(e) => setInputValue(e.target.value)}
             className="block w-full pl-12 pr-4 py-2 bg-[#E8ECEF] border-2 border-transparent focus:border-slate-200 focus:bg-white rounded-2xl transition-all outline-none"
           />
         </div>
         <div className="flex gap-5">
-          {[
-            { label: "All Users", value: "" },
-            { label: "Active", value: "active" },
-            { label: "Blocked", value: "blocked" },
-          ].map(({ label, value }) => (
+          {STATUS_FILTERS.map(({ label, value }) => (
             <button
-              key={label}
+              key={value}
               onClick={() => handleStatusFilter(value)}
               className={`whitespace-nowrap px-4 py-2 rounded-lg ${
                 activeStatus === value
-                  ? "bg-[#652D8B] text-white"
+                  ? "bg-[#F7B115] text-white"
                   : "bg-[#E8ECEF] text-slate-700"
               }`}
             >

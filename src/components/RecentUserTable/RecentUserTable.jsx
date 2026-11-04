@@ -83,7 +83,7 @@ function UserAvatar({ src, name }) {
     <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 relative flex items-center justify-center">
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="w-4 h-4 border-2 border-[#652D8B] border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-[#F7B115] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
       <img
@@ -106,15 +106,14 @@ function UserAvatar({ src, name }) {
 function StatusModal({ user, onClose }) {
   const [updateUserStatus, { isLoading }] = useUpdateUserStatusMutation();
 
-  const isActive = user?.status === "active";
-  const targetStatus = isActive ? "blocked" : "active";
+  const isActive = user?.status?.toLowerCase() === "active";
+  const targetStatus = isActive ? "Suspended" : "Active";
 
-  const handleConfirm = async () => {
+   const handleConfirm = async () => {
     try {
-      const reqData = { id: user._id, status: targetStatus };
-      await updateUserStatus(reqData).unwrap();
+      await updateUserStatus({ id: user.id, status: targetStatus }).unwrap();
       toast.success(
-        `User ${targetStatus === "blocked" ? "blocked" : "activated"} successfully!`,
+        `User ${isActive ? "suspended" : "activated"} successfully!`,
       );
       onClose();
     } catch (err) {
@@ -141,8 +140,8 @@ function StatusModal({ user, onClose }) {
         </h3>
         <p className="text-gray-500 text-sm mb-6">
           {isActive
-            ? `Are you sure you want to block "${user?.name}"? They won't be able to access the platform.`
-            : `Are you sure you want to activate "${user?.name}"? They will regain access to the platform.`}
+            ? `Are you sure you want to block "${user?.userName}"? They won't be able to access the platform.`
+            : `Are you sure you want to activate "${user?.userName}"? They will regain access to the platform.`}
         </p>
         <div className="flex gap-3 justify-center">
           <button
@@ -176,7 +175,7 @@ function StatusModal({ user, onClose }) {
 function RoleBadge({ role }) {
   const styles =
     role === "admin"
-      ? "bg-purple-100 text-[#652D8B]"
+      ? "bg-purple-100 text-[#F7B115]"
       : role === "staff"
         ? "bg-blue-100 text-blue-700"
         : "bg-gray-100 text-gray-500";
@@ -194,6 +193,7 @@ function RoleBadge({ role }) {
 const RecentUsersTable = ({ users, isLoading }) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
+
   const columns = [
     {
       title: "#",
@@ -207,27 +207,27 @@ const RecentUsersTable = ({ users, isLoading }) => {
       key: "user",
       render: (_, record) => (
         <div>
-          <p className="font-semibold">{record.name || "—"}</p>
-          <p className="text-gray-500 text-sm">{record.email || "—"}</p>
+          <p className="font-semibold">{record.userName || "—"}</p>
+          <p className="text-gray-500 text-sm">{record.userEmail || "—"}</p>
         </div>
       ),
     },
     {
       title: "Phone Number",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
+      dataIndex: "userPhoneNumber",
+      key: "userPhoneNumber",
       render: (val) => val || "—",
     },
     {
       title: "Location",
-      dataIndex: "address",
-      key: "address",
+      dataIndex: "userLocation",
+      key: "userLocation",
       render: (val) => val || "—",
     },
     {
       title: "Joined",
-      dataIndex: "joinedAt",
-      key: "joinedAt",
+      dataIndex: "joinedDate",
+      key: "joinedDate",
       render: (val) =>
         val
           ? new Date(val).toLocaleDateString("en-US", {
@@ -237,12 +237,7 @@ const RecentUsersTable = ({ users, isLoading }) => {
             })
           : "—",
     },
-    {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      render: (role) => <RoleBadge role={role} />,
-    },
+    
     {
       title: "Status",
       dataIndex: "status",
@@ -250,11 +245,11 @@ const RecentUsersTable = ({ users, isLoading }) => {
       render: (status) => (
         <span
           className={`px-4 py-1 rounded-full text-sm font-medium capitalize ${
-            status === "active"
+            status === "Active"
               ? "bg-green-100 text-green-700"
               : status === "pending"
                 ? "bg-yellow-100 text-yellow-700"
-                : status === "blocked"
+                : status === "Suspended"
                   ? "bg-red-100 text-red-600"
                   : "bg-gray-100 text-gray-500"
           }`}
@@ -321,7 +316,7 @@ const RecentUsersTable = ({ users, isLoading }) => {
         dataSource={users}
         loading={false}
         pagination={false}
-        rowKey="_id"
+       rowKey={(record) => record.id}
       />
       <StatusModal user={selectedUser} onClose={() => setSelectedUser(null)} />
     </>

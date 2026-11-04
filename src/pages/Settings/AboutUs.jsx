@@ -4,20 +4,21 @@ import { toast } from "react-toastify";
 import TextEditor from "../../components/TextEditor";
 import { LegalSkeleton } from "../../components/shimmer/LegalSkeleton";
 import {
-  useGetContentQuery,
-  useSaveContentMutation,
+  useGetAboutUsQuery,
+  useUpdateAboutUsMutation,
 } from "../../redux/api/profileApi";
 
-const CONTENT_TYPE = "about_us";
 
 export default function AboutUs() {
   const [content, setContent] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { data, isLoading, refetch } = useGetContentQuery(CONTENT_TYPE);
-  const [saveContent, { isLoading: isSaving }] = useSaveContentMutation();
+  const { data, isLoading, refetch } = useGetAboutUsQuery();
+  const [saveContent, { isLoading: isSaving }] = useUpdateAboutUsMutation();
 
+
+  console.log(data)
   const serverContent = data?.data?.content ?? "";
   if (!initialized && serverContent) {
     setContent(serverContent);
@@ -25,8 +26,9 @@ export default function AboutUs() {
   }
 
   const handleSave = async () => {
+
     try {
-      await saveContent({ type: CONTENT_TYPE, content }).unwrap();
+      await saveContent({content }).unwrap();
       setShowSuccess(true);
       refetch();
       toast.success("About Us updated successfully");
@@ -71,7 +73,7 @@ export default function AboutUs() {
           className={`w-full py-4 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-[0.98] tracking-wide ${
             isSaving
               ? "bg-purple-300 text-white cursor-not-allowed"
-              : "bg-[#652D8B] text-white hover:bg-[#7b3aa8]"
+              : "bg-[#F7B115] text-white "
           }`}
         >
           {isSaving ? "Saving..." : "Save Changes"}
